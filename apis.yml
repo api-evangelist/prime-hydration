@@ -1,18 +1,82 @@
 aid: prime-hydration
 name: Prime Hydration
-description: 'Prime Hydration is a company surfaced via the API Evangelist harvest backlog (source: secondary-market)
-  and added to the network as a stub for full-pipeline profiling.'
+description: >-
+  Prime Hydration, LLC is an American beverage company founded in 2022 by Logan Paul and Olajide
+  "KSI" Olatunji, manufacturing sports and hydration drinks, zero-sugar hydration, energy drinks,
+  hydration sticks and protein shakes sold direct-to-consumer at drinkprime.com and through
+  retail distribution across North America, Europe, Australia and the Middle East. Prime is not a
+  software company and publishes no developer program, SDK or REST API. Its machine-readable
+  surface is its own storefront: the drinkprime.com store implements the Universal Commerce
+  Protocol (UCP) natively on Shopify, publishing a UCP merchant profile at /.well-known/ucp, an
+  anonymous MCP endpoint at /api/ucp/mcp exposing thirteen catalog, cart, checkout and order
+  tools, an agent-instruction document at /agents.md mirrored to /llms.txt, and Shopify Customer
+  Accounts OAuth 2.0 / OpenID Connect metadata. Agent-driven purchase is explicitly permitted;
+  agent-completed payment without contemporaneous buyer approval is explicitly forbidden.
 url: https://raw.githubusercontent.com/api-evangelist/prime-hydration/refs/heads/main/apis.yml
+image: https://drinkprime.com/cdn/shop/files/PRIME_Social_Sharing_Image_1200x.png?v=1734715820
 x-type: company
 x-source: harvest:secondary-market
-x-tier: stub
-x-tier-reason: harvest
 specificationVersion: '0.20'
 created: '2026-08-26'
 modified: '2026-08-26'
 tags:
 - Company
-apis: []
+- Beverages
+- Consumer Packaged Goods
+- Food and Beverage
+- Retail
+- E-Commerce
+- Direct to Consumer
+- Agentic Commerce
+- Universal Commerce Protocol
+- Model Context Protocol
+- Shopify
+- Sports Nutrition
+apis:
+- name: PRIME Storefront Agentic Commerce API (UCP / MCP)
+  description: >-
+    The agent-facing commerce surface of the PRIME online store. Served from drinkprime.com, it
+    implements the Universal Commerce Protocol (UCP) shopping service over MCP transport: a
+    discovery document at /.well-known/ucp declaring supported UCP versions, services,
+    capabilities and payment handlers, and a JSON-RPC MCP endpoint at /api/ucp/mcp that answers
+    tools/list anonymously with thirteen tools covering catalog search and lookup, product
+    retrieval, cart create/read/update/cancel, and checkout create/read/update/complete/cancel
+    plus order retrieval. complete_checkout requires an idempotency key and buyer approval.
+  humanURL: https://drinkprime.com/agents.md
+  baseURL: https://drinkprime.com/api/ucp/mcp
+  tags:
+  - Agentic Commerce
+  - MCP
+  - Universal Commerce Protocol
+  - Catalog
+  - Cart
+  - Checkout
+  - Orders
+  properties:
+  - type: MCPServer
+    url: mcp/prime-hydration-mcp.yml
+  - type: Authentication
+    url: authentication/prime-hydration-authentication.yml
+  - type: OAuthScopes
+    url: scopes/prime-hydration-scopes.yml
+  - type: Conventions
+    url: conventions/prime-hydration-conventions.yml
+  - type: Idempotency
+    url: conventions/prime-hydration-conventions.yml
+  - type: DataModel
+    url: data-model/prime-hydration-data-model.yml
+  - type: RateLimits
+    url: rate-limits/prime-hydration-rate-limits.yml
+  - type: Plans
+    url: plans/prime-hydration-plans-pricing.yml
+  - type: Lifecycle
+    url: lifecycle/prime-hydration-lifecycle.yml
+  - type: Conformance
+    url: conformance/prime-hydration-conformance.yml
+  - type: AgenticAccess
+    url: agentic-access/prime-hydration-agentic-access.yml
+  - type: AgentSkill
+    url: skills/_index.yml
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
@@ -20,4 +84,27 @@ maintainers:
   email: info@apis.io
 common:
 - type: Website
-  url: https://forgeglobal.com/prime-hydration_stock/
+  url: https://drinkprime.com/
+- type: Documentation
+  url: https://drinkprime.com/agents.md
+- type: LLMsTxt
+  url: llms/prime-hydration-llms.txt
+- type: WellKnown
+  url: well-known/prime-hydration-well-known.yml
+- type: DomainSecurity
+  url: security/prime-hydration-domain-security.yml
+- type: Support
+  url: https://drinkprime.com/pages/contact-us
+- type: Blog
+  url: https://drinkprime.com/blogs/news
+- type: Login
+  url: https://drinkprime.com/account/login
+- type: TermsOfService
+  url: https://drinkprime.com/policies/terms-of-service
+- type: PrivacyPolicy
+  url: https://drinkprime.com/policies/privacy-policy
+x-enrichment:
+  date: '2026-08-26'
+  status: enriched
+  artifacts_added: 22
+  pass: local-v1

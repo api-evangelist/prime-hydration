@@ -1,0 +1,34 @@
+generated: '2026-08-26'
+method: searched
+source: https://drinkprime.com/llms.txt
+docs: https://drinkprime.com/agents.md
+limit_count: 0
+note: >-
+  Prime Hydration acknowledges rate limiting on its agent endpoint but publishes no number,
+  no window and no response-header contract. llms.txt states verbatim: "Respect rate limits.
+  The MCP endpoint is rate-limited per IP. Back off on 429 responses." That is the entire
+  published limit surface. limit_count is 0 because no enumerable limit exists to record - the
+  scope and the exhaustion status code below are real and probed/published, the quantities are
+  not.
+limits: []
+signaling:
+  status_on_exhaustion: 429
+  status_source: https://drinkprime.com/llms.txt
+  headers_documented: []
+  retry_after_documented: false
+  ratelimit_headers_documented: false
+  client_guidance: Back off on 429 responses.
+scope:
+  dimension: per-ip
+  applies_to: https://drinkprime.com/api/ucp/mcp
+  source: https://drinkprime.com/llms.txt
+observed:
+  probed: true
+  note: >-
+    A single anonymous tools/list POST on 2026-08-26 returned HTTP 200 with no RateLimit-*,
+    X-RateLimit-* or Retry-After header on the response. No load test was run - it would be
+    abusive against a live consumer storefront.
+gap: >-
+  An agent operating against this store cannot compute a request budget or a backoff schedule
+  from anything the provider publishes. Publishing RateLimit-Limit / RateLimit-Remaining /
+  RateLimit-Reset (RFC 9331 draft) or Retry-After on the 429 would close this entirely.

@@ -1,0 +1,64 @@
+generated: '2026-08-26'
+method: probed
+source: >-
+  https://drinkprime.com/.well-known/openid-configuration (200),
+  https://drinkprime.com/.well-known/oauth-authorization-server (200),
+  https://drinkprime.com/.well-known/oauth-protected-resource (200), and an anonymous
+  tools/list against https://drinkprime.com/api/ucp/mcp (200) - probed 2026-08-26.
+note: >-
+  Derived from probed metadata, not from an OpenAPI - Prime Hydration publishes no OpenAPI, so
+  derive-authentication.py had nothing to read. Two distinct auth postures coexist on this
+  provider.
+schemes:
+- id: none
+  type: none
+  applies_to: https://drinkprime.com/api/ucp/mcp
+  description: >-
+    The UCP shopping MCP endpoint answers tools/list anonymously - no Authorization header, no
+    API key, no OAuth challenge. Catalog search/lookup, cart and checkout construction are all
+    reachable without credentials.
+  evidence: >-
+    POST /api/ucp/mcp with no Authorization header returned HTTP 200 and the full 13-tool
+    manifest with inputSchemas.
+  identity_substitute: >-
+    Instead of a credential, every tool requires meta.ucp-agent.profile - a URI identifying the
+    calling agent. This is agent attestation/discovery, not authentication: it is unverified
+    caller-asserted metadata and grants no privilege.
+- id: buyer_approval
+  type: out-of-band
+  applies_to: complete_checkout
+  description: >-
+    Payment is authorized by the human buyer, not by the agent. complete_checkout additionally
+    requires meta.idempotency-key. Buyer approval is a hard published requirement, restated in
+    both robots.txt and llms.txt.
+  evidence: https://drinkprime.com/robots.txt, https://drinkprime.com/llms.txt
+- id: shopify_customer_accounts
+  type: openIdConnect
+  applies_to: https://drinkprime.com (customer account resources)
+  description: >-
+    Shopify Customer Accounts OAuth 2.0 / OpenID Connect, for a shopper acting on their own
+    account. Authorization code flow with PKCE.
+  issuer: https://shopify.com/authentication/60993569009
+  authorization_endpoint: https://orders.drinkprime.com/authentication/oauth/authorize
+  token_endpoint: https://orders.drinkprime.com/authentication/oauth/token
+  end_session_endpoint: https://orders.drinkprime.com/authentication/logout
+  jwks_uri: https://orders.drinkprime.com/authentication/.well-known/jwks.json
+  grant_types_supported:
+  - authorization_code
+  - refresh_token
+  - urn:ietf:params:oauth:grant-type:jwt-bearer
+  response_types_supported: [code]
+  code_challenge_methods_supported: [S256]
+  token_endpoint_auth_methods_supported: [client_secret_basic, client_secret_post]
+  id_token_signing_alg_values_supported: [RS256]
+  subject_types_supported: [public]
+  claims_supported: [iss, sub, aud, exp, iat, nonce, sid, email, email_verified]
+  scopes: See scopes/prime-hydration-scopes.yml
+  bearer_methods_supported: [header]
+  protected_resource: https://drinkprime.com
+registration:
+  self_service: false
+  note: >-
+    There is no developer signup, API key issuance, or client registration surface. The MCP
+    endpoint needs no registration; the Customer Accounts client is a Shopify-issued client for
+    the storefront, not something a third party can provision here.

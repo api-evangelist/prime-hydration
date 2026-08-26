@@ -1,0 +1,39 @@
+generated: '2026-08-26'
+method: probed
+source: >-
+  scopes_supported read verbatim from https://drinkprime.com/.well-known/openid-configuration
+  (HTTP 200, probed 2026-08-26) and https://drinkprime.com/.well-known/oauth-authorization-server
+  (HTTP 200, byte-identical).
+docs: null
+note: >-
+  Prime Hydration publishes no scopes reference page - there is no developer portal to host one.
+  These four scopes are the ones the provider's own authorization-server metadata advertises for
+  the Shopify Customer Accounts issuer bound to this store (shop 60993569009). The UCP shopping
+  MCP endpoint at /api/ucp/mcp is anonymous and consumes no scope.
+authorization_server: https://shopify.com/authentication/60993569009
+flow: authorization_code (PKCE S256)
+scope_count: 4
+scopes:
+- name: openid
+  description: >-
+    Standard OpenID Connect scope. Requests an ID token identifying the signed-in shopper.
+  standard: OpenID Connect Core 1.0
+- name: email
+  description: >-
+    Standard OpenID Connect scope. Releases the email and email_verified claims for the
+    signed-in shopper.
+  standard: OpenID Connect Core 1.0
+- name: customer-account-api:full
+  description: >-
+    Full access to the Shopify Customer Account API for the authenticated shopper - their own
+    orders, addresses, payment methods and profile on the PRIME store.
+  standard: Shopify Customer Accounts
+- name: customer-account-mcp-api:full
+  description: >-
+    Full access to the Shopify Customer Account MCP API for the authenticated shopper - the
+    agent-facing projection of that same account data.
+  standard: Shopify Customer Accounts
+  note: >-
+    A probe of POST https://orders.drinkprime.com/customer-account-api/mcp returned HTTP 404
+    anonymously; the customer-account MCP surface, unlike the storefront UCP surface, is not
+    anonymously discoverable and its tool schemas would require an authenticated shopper session.

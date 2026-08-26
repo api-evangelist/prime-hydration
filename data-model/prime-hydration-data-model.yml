@@ -1,0 +1,150 @@
+generated: '2026-08-26'
+method: derived
+source: >-
+  mcp/prime-hydration-mcp-tools.json - the verbatim tools/list response from
+  https://drinkprime.com/api/ucp/mcp (HTTP 200, 2026-08-26). Entities and relationships are read
+  from the 13 tool inputSchemas and their identifier formats. There is no OpenAPI to derive
+  from; this is the only structured contract Prime Hydration publishes.
+note: >-
+  Shapes are named after the UCP shopping capabilities the merchant profile declares
+  (dev.ucp.shopping.catalog, .cart, .checkout, .fulfillment, .discount, .order). Fields not
+  visible in the request schemas are not invented here - response schemas are not published in
+  tools/list, so this graph is the request-side and identifier-side view only.
+identifier_scheme:
+  format: Shopify Global ID (GID) URN
+  pattern: 'gid://shopify/{Type}/{id}'
+  observed:
+  - 'gid://shopify/Checkout/abc123'
+  - 'gid://shopify/Cart/abc123'
+  opaque: true
+  agent_rule: Server-issued; never construct or mutate.
+money_type:
+  name: Money
+  fields:
+  - name: amount
+    type: integer
+    note: Minor units of the currency (600 == $6.00 in USD).
+  - name: currency
+    type: string
+    note: ISO 4217 code.
+entities:
+- name: Product
+  capability: dev.ucp.shopping.catalog
+  accessed_by: [search_catalog, lookup_catalog, get_product]
+  identified_by: product identifier (GID or handle)
+  note: >-
+    Also readable without MCP at GET /products/{handle}.json and GET /products.json on the
+    storefront.
+- name: Variant
+  capability: dev.ucp.shopping.catalog
+  accessed_by: [lookup_catalog, get_product]
+  identified_by: variant identifier
+  note: lookup_catalog accepts "products or variants by identifier".
+- name: Cart
+  capability: dev.ucp.shopping.cart
+  accessed_by: [create_cart, get_cart, update_cart, cancel_cart]
+  identified_by: 'gid://shopify/Cart/{id}'
+- name: Checkout
+  capability: dev.ucp.shopping.checkout
+  accessed_by: [create_checkout, get_checkout, update_checkout, complete_checkout, cancel_checkout]
+  identified_by: 'gid://shopify/Checkout/{id}'
+  note: Carries line items, totals, discounts, taxes, payment and fulfillment selections.
+- name: LineItem
+  capability: dev.ucp.shopping.cart
+  accessed_by: [create_cart, update_cart, create_checkout, update_checkout]
+  identified_by: variant reference + quantity
+- name: Order
+  capability: dev.ucp.shopping.order
+  accessed_by: [get_order, complete_checkout]
+  identified_by: order ID returned by complete_checkout
+- name: Discount
+  capability: dev.ucp.shopping.discount
+  accessed_by: [get_checkout, update_checkout]
+  note: >-
+    Declared as a capability in /.well-known/ucp; surfaces as applicable discounts on the
+    checkout rather than as a standalone tool.
+- name: Fulfillment
+  capability: dev.ucp.shopping.fulfillment
+  accessed_by: [update_checkout]
+  config_from_ucp_profile:
+    allows_multi_destination.shipping: false
+    allows_method_combinations: [[shipping]]
+  note: >-
+    Read verbatim from /.well-known/ucp - this store ships to ONE destination per checkout and
+    supports only the "shipping" method combination. A material constraint an agent must respect
+    when splitting a buyer's basket.
+- name: PaymentHandler
+  capability: payment_handlers
+  accessed_by: [complete_checkout]
+  instances:
+  - id: gpay
+    handler: com.google.pay
+    version: '2026-01-11'
+    card_networks: [VISA, MASTERCARD, AMEX, DISCOVER]
+    billing_address_required: true
+  - id: shopify.card
+    handler: dev.shopify.card
+    version: '2026-01-15'
+    card_brands: [visa, master, american_express, discover, diners_club]
+  - id: shop_pay
+    handler: dev.shopify.shop_pay
+    version: '2026-04-08'
+  note: >-
+    Read verbatim from /.well-known/ucp payment_handlers. Card data is handled by these
+    handlers, not by Prime Hydration's agent surface.
+- name: AgentProfile
+  capability: ucp discovery
+  accessed_by: all 13 tools
+  identified_by: meta.ucp-agent.profile (URI)
+  note: Caller-asserted, unverified. Identity metadata, not a credential.
+- name: Customer
+  capability: shopify customer accounts
+  accessed_by: OAuth 2.0 / OIDC at orders.drinkprime.com (not exposed through this MCP endpoint)
+  note: See authentication/ and scopes/. A probe of the customer-account MCP surface 404d anonymously.
+relationships:
+- from: Cart
+  to: LineItem
+  type: has_many
+  via: cart.line_items
+- from: LineItem
+  to: Variant
+  type: belongs_to
+  via: variant identifier
+- from: Variant
+  to: Product
+  type: belongs_to
+  via: product identifier
+- from: Checkout
+  to: Cart
+  type: belongs_to
+  via: cart id supplied to create_checkout
+- from: Checkout
+  to: LineItem
+  type: has_many
+  via: checkout.line_items
+- from: Checkout
+  to: Discount
+  type: has_many
+  via: applicable discounts on the checkout
+- from: Checkout
+  to: Fulfillment
+  type: has_one
+  via: shipping address + method set by update_checkout
+- from: Checkout
+  to: PaymentHandler
+  type: has_one
+  via: checkout.payment supplied to complete_checkout
+- from: Order
+  to: Checkout
+  type: belongs_to
+  via: order ID returned by complete_checkout
+- from: Order
+  to: Customer
+  type: belongs_to
+  via: buyer identity captured at checkout
+gaps:
+  response_schemas: >-
+    tools/list publishes inputSchema only. Response shapes are described in prose in the tool
+    descriptions and formally only in the ucp.dev capability schemas
+    (https://ucp.dev/2026-04-08/schemas/shopping/*.json), which are the standard's, not the
+    provider's.

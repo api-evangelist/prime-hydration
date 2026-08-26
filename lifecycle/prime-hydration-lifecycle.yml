@@ -1,0 +1,53 @@
+generated: '2026-08-26'
+method: probed
+source: >-
+  https://drinkprime.com/.well-known/ucp (HTTP 200) and https://drinkprime.com/llms.txt
+  (HTTP 200), probed 2026-08-26.
+versioning:
+  scheme: date-based (YYYY-MM-DD), inherited from the Universal Commerce Protocol
+  current: '2026-04-08'
+  labelled: latest stable
+  supported:
+  - version: '2026-04-08'
+    status: latest stable
+    discovery: https://drinkprime.myshopify.com/.well-known/ucp/2026-04-08
+  - version: '2026-01-23'
+    status: supported
+    discovery: https://drinkprime.myshopify.com/.well-known/ucp/2026-01-23
+  negotiation: >-
+    Version-pinned discovery documents under /.well-known/ucp/{version}; the root profile
+    enumerates which are live.
+  owned_by: >-
+    The Universal Commerce Protocol and the Shopify platform, not Prime Hydration. Prime
+    Hydration versions nothing of its own; it inherits whatever UCP versions its platform
+    serves. An integrator's version risk sits with ucp.dev and Shopify.
+deprecation_policy:
+  published: false
+  sunset_header: not documented
+  deprecation_header: not documented
+  rfc8594: false
+  note: >-
+    No deprecation policy, no notice period and no Sunset/Deprecation header contract is
+    published on any Prime Hydration surface. The 2026-01-23 UCP version is still listed as
+    supported with no stated end date. No Deprecation pointer is emitted for this reason.
+status_page:
+  published: false
+  url: null
+  note: >-
+    No status.drinkprime.com, no status page linked from the storefront, llms.txt, agents.md or
+    robots.txt, and no incident history surface. No StatusPage pointer is emitted for this
+    reason.
+sla:
+  published: false
+  note: No uptime or availability commitment of any kind is published for the agent endpoint.
+changelog:
+  published: false
+  note: >-
+    No dated changelog for the commerce surface. The store's blog at /blogs/news is product
+    marketing, not release notes. No changelog/ artifact was written.
+deprecated_operations: []
+maturity:
+  surface_first_observed: '2026-08-26'
+  note: >-
+    First API Evangelist observation of this surface. The UCP profile advertises version
+    2026-04-08 as latest stable, so the store has been on the protocol at least since then.

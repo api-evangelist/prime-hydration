@@ -1,0 +1,144 @@
+generated: '2026-08-26'
+method: probed
+source: >-
+  https://drinkprime.com/.well-known/ucp,
+  https://drinkprime.com/.well-known/openid-configuration,
+  https://drinkprime.com/.well-known/oauth-authorization-server,
+  https://drinkprime.com/.well-known/oauth-protected-resource, and the live tools/list at
+  https://drinkprime.com/api/ucp/mcp - all HTTP 200, probed 2026-08-26.
+note: >-
+  Every assertion below is read out of a document the provider's own host serves, not out of a
+  marketing claim. Prime Hydration publishes no compliance or certification program of its own,
+  so no Compliance or TrustCenter pointer is emitted.
+domain_standard:
+  id: ucp
+  name: Universal Commerce Protocol
+  version: '2026-04-08'
+  market: agentic commerce / retail checkout
+  conforms: true
+  evidence:
+    location: https://drinkprime.com/.well-known/ucp
+    signature: >-
+      The merchant profile declares the reserved UCP namespace identifiers directly -
+      services["dev.ucp.shopping"] with transport "mcp", and capabilities keyed
+      dev.ucp.shopping.cart, dev.ucp.shopping.checkout, dev.ucp.shopping.fulfillment,
+      dev.ucp.shopping.discount, dev.ucp.shopping.order, dev.ucp.shopping.catalog.search and
+      dev.ucp.shopping.catalog.lookup, each bound to a versioned ucp.dev spec and JSON Schema.
+    corroboration: >-
+      search_catalog's own tool description states "Response conforms to the UCP catalog search
+      capability (dev.ucp.shopping.catalog.search)."
+  spec: https://ucp.dev/2026-04-08/specification/overview/
+  schema: https://ucp.dev/2026-04-08/services/shopping/mcp.openrpc.json
+  buyer_impact: >-
+    An agent that already speaks UCP can transact with this store with no bespoke connector -
+    discover, search, cart, check out and read orders using the same tool names and schemas it
+    uses at any other UCP merchant. That is the whole point of the standard, and it is the
+    single most valuable machine-readable thing Prime Hydration serves.
+  extensions:
+  - id: dev.shopify.catalog
+    version: '2026-04-08'
+    extends: [dev.ucp.shopping.catalog.search, dev.ucp.shopping.catalog.lookup]
+    spec: https://shopify.dev/docs/agents/catalog/storefront-catalog
+    note: Platform extension to the standard catalog capability.
+conformance:
+- id: ucp
+  name: Universal Commerce Protocol 2026-04-08
+  conforms: true
+  evidence: >-
+    /.well-known/ucp declares version 2026-04-08 plus supported_versions 2026-04-08 and
+    2026-01-23, with per-version discovery documents.
+- id: mcp
+  name: Model Context Protocol (JSON-RPC 2.0 tools transport)
+  conforms: true
+  evidence: >-
+    POST /api/ucp/mcp with {"jsonrpc":"2.0","id":1,"method":"tools/list"} returned a well-formed
+    JSON-RPC 2.0 result containing 13 tools, each with name, description and a JSON Schema
+    inputSchema.
+- id: json-schema-2020-12
+  name: JSON Schema draft 2020-12
+  conforms: true
+  evidence: >-
+    Every one of the 13 tool inputSchemas declares
+    "$schema": "https://json-schema.org/draft/2020-12/schema".
+- id: oauth2
+  name: OAuth 2.0 authorization code grant
+  conforms: true
+  evidence: >-
+    /.well-known/openid-configuration advertises response_types_supported [code],
+    grant_types_supported [authorization_code, refresh_token,
+    urn:ietf:params:oauth:grant-type:jwt-bearer].
+- id: oidc
+  name: OpenID Connect Core 1.0 discovery
+  conforms: true
+  evidence: >-
+    /.well-known/openid-configuration served with issuer, jwks_uri, id_token signing RS256, and
+    claims_supported including iss/sub/aud/exp/iat/nonce/sid/email/email_verified.
+- id: rfc8414
+  name: RFC 8414 OAuth 2.0 Authorization Server Metadata
+  conforms: true
+  evidence: /.well-known/oauth-authorization-server served, HTTP 200.
+- id: rfc9728
+  name: RFC 9728 OAuth 2.0 Protected Resource Metadata
+  conforms: true
+  evidence: >-
+    /.well-known/oauth-protected-resource served with resource https://drinkprime.com,
+    authorization_servers [...], bearer_methods_supported [header].
+- id: rfc7636
+  name: RFC 7636 PKCE
+  conforms: true
+  evidence: code_challenge_methods_supported ["S256"] in the OIDC discovery document.
+- id: iso4217
+  name: ISO 4217 currency codes with minor-unit integer amounts
+  conforms: true
+  evidence: >-
+    All 13 tool descriptions state prices are "integers in the currency's ISO 4217 minor units,
+    paired with a currency code".
+- id: idempotency
+  name: Idempotent write semantics
+  conforms: partial
+  evidence: >-
+    meta.idempotency-key is REQUIRED on complete_checkout and absent from every other write
+    tool. Retention and replay-conflict behaviour are not published.
+- id: pagination
+  name: Cursor pagination
+  conforms: true
+  evidence: search_catalog documents pagination.cursor for fetching additional pages.
+- id: rfc9457
+  name: RFC 9457 Problem Details for HTTP APIs
+  conforms: false
+  evidence: >-
+    No problem+json media type, no error type registry and no enumerated error catalogue on any
+    surface. Failures surface as JSON-RPC 2.0 errors only.
+- id: llmstxt
+  name: llms.txt agent-instruction convention
+  conforms: true
+  evidence: >-
+    https://drinkprime.com/llms.txt HTTP 200 text/markdown, mirroring the canonical
+    /agents.md, and both are advertised from robots.txt and from
+    /sitemap_agentic_discovery.xml.
+- id: a2a
+  name: A2A Agent Card
+  conforms: false
+  evidence: >-
+    /.well-known/agent-card.json and /.well-known/agent.json both returned HTTP 404 on
+    drinkprime.com and orders.drinkprime.com.
+- id: securitytxt
+  name: RFC 9116 security.txt
+  conforms: false
+  evidence: /.well-known/security.txt returned HTTP 404 on both hosts.
+- id: openapi
+  name: OpenAPI
+  conforms: false
+  evidence: >-
+    /openapi.json, /openapi.yaml, /swagger.json, /v1/openapi.json, /api-docs and /redoc all
+    404 on drinkprime.com. No OpenAPI is published anywhere; the machine contract here is the
+    UCP/MCP tool schema set, not a REST spec.
+compliance_programs:
+  published: false
+  certifications: []
+  note: >-
+    No SOC 2, ISO 27001, PCI DSS, HIPAA or FedRAMP claim is published on any Prime Hydration
+    surface, and no trust center exists. Card data never touches Prime Hydration's own agent
+    surface - the UCP profile delegates payment to com.google.pay, dev.shopify.card and
+    dev.shopify.shop_pay handlers - so the PCI posture belongs to those handlers, not to this
+    provider. No Compliance pointer emitted.

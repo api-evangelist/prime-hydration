@@ -1,0 +1,157 @@
+generated: '2026-08-26'
+method: probed
+source: >-
+  Derived from the live tool schemas at POST https://drinkprime.com/api/ucp/mcp (tools/list,
+  HTTP 200) plus the provider-published https://drinkprime.com/llms.txt,
+  https://drinkprime.com/agents.md, https://drinkprime.com/robots.txt and
+  https://drinkprime.com/policies/refund-policy - all probed 2026-08-26.
+scope: >-
+  Cross-cutting semantics of the PRIME storefront agentic commerce surface (UCP over MCP).
+  There is no REST API and no OpenAPI, so every convention below is read from the MCP tool
+  inputSchemas and the provider's published agent instructions.
+auth_style:
+  summary: Anonymous for the MCP endpoint; OAuth 2.0 / OIDC for shopper account resources.
+  detail: See authentication/prime-hydration-authentication.yml
+  agent_attestation:
+    field: meta.ucp-agent.profile
+    type: string (uri)
+    required_on: all 13 tools
+    note: >-
+      Caller-asserted agent profile URI for UCP discovery. Required on every call; not a
+      credential and not verified.
+idempotency:
+  supported: true
+  grade: partial
+  mechanism: request field
+  field: meta.idempotency-key
+  location: MCP tool arguments (meta object), not an HTTP header
+  required: true
+  applies_to:
+  - complete_checkout
+  not_applied_to:
+  - create_cart
+  - create_checkout
+  - update_cart
+  - update_checkout
+  - cancel_cart
+  - cancel_checkout
+  retention: not published
+  conflict_behavior: not published
+  evidence: >-
+    complete_checkout.inputSchema.properties.meta.required == ["ucp-agent","idempotency-key"]
+    with description "An idempotency key for completing the checkout." Read verbatim from the
+    live tools/list response, mcp/prime-hydration-mcp-tools.json.
+  note: >-
+    Idempotency is required exactly where it matters most - the single irreversible,
+    money-moving operation - but it is absent from every other write tool, and neither the key
+    retention window nor the replay-conflict behaviour is published anywhere. An agent can be
+    certain it will not double-charge a buyer; it cannot be certain what happens if it retries
+    create_cart or update_checkout.
+pagination:
+  style: cursor
+  applies_to: [search_catalog]
+  request_field: catalog.pagination.cursor
+  response_field: pagination.cursor
+  note: >-
+    "Results are paginated, with initial results limited to improve experience. Use the
+    pagination.cursor from the response to fetch additional pages when users request more
+    results." - search_catalog tool description, verbatim.
+money:
+  representation: integer minor units + ISO 4217 currency code
+  shape: '{"amount": 600, "currency": "USD"}'
+  agent_rule: >-
+    Convert to major units before quoting a price to a buyer - divide by 100 for two-decimal
+    currencies such as USD and EUR; zero-decimal currencies such as JPY are already whole units.
+  note: This paragraph is repeated verbatim in all 13 tool descriptions.
+identifiers:
+  format: Shopify global ID (GID) URNs
+  examples:
+  - gid://shopify/Checkout/abc123
+  - gid://shopify/Cart/abc123
+  note: Opaque and server-issued; agents must not construct them.
+localization:
+  fields:
+  - context.address_country
+  - context.currency
+  note: >-
+    "Use buyer context. Pass context.address_country and context.currency for accurate pricing
+    and availability." - llms.txt, verbatim. The store also serves a French locale (/fr/).
+versioning:
+  scheme: date-based protocol version
+  current: '2026-04-08'
+  supported:
+  - '2026-04-08'
+  - '2026-01-23'
+  negotiation: >-
+    Per-version discovery documents at /.well-known/ucp/{version}; the root /.well-known/ucp
+    declares which versions are live. Version is a property of the UCP protocol, not of a
+    Prime Hydration API - Prime Hydration does not version anything itself.
+  source: https://drinkprime.com/.well-known/ucp
+error_envelope:
+  format: JSON-RPC 2.0 error object
+  note: >-
+    The MCP transport is JSON-RPC 2.0, so transport-level failures return a JSON-RPC error.
+    Tool-level failures are described only as "any errors encountered" in complete_checkout's
+    description; no error code registry, no RFC 9457 problem+json, and no enumerated failure
+    catalogue is published. This is why no errors/ artifact was written - there is nothing real
+    to catalogue.
+  rfc9457: false
+rate_limit_signaling:
+  documented_headers: none
+  status_on_exhaustion: 429
+  rule: >-
+    "Respect rate limits. The MCP endpoint is rate-limited per IP. Back off on 429 responses."
+    - llms.txt, verbatim. No numeric limit, no window and no RateLimit-* / Retry-After header
+    contract is published.
+  detail: See rate-limits/prime-hydration-rate-limits.yml
+dry_run_mode:
+  supported: false
+  grade: none
+  note: >-
+    No test mode, no sandbox store, no simulation flag on any tool. An agent cannot rehearse a
+    checkout. The nearest safe rehearsal is create_checkout followed by cancel_checkout, which
+    exercises the real store.
+reversibility:
+  grade: documented
+  summary: >-
+    Every pre-payment step is reversible by an explicit tool; the payment itself is not
+    reversible at all, and the provider says so in writing.
+  write_surfaces:
+  - operation: create_cart
+    reversal: cancel_cart
+    reversal_operation_id: cancel_cart
+    window: not stated
+    window_source: null
+    grade: documented
+    note: >-
+      A cancel tool exists and is documented in the live tools/list, but no expiry or validity
+      window for a cart is published anywhere.
+  - operation: create_checkout
+    reversal: cancel_checkout
+    reversal_operation_id: cancel_checkout
+    window: not stated - implicitly before complete_checkout
+    window_source: null
+    grade: documented
+    note: >-
+      cancel_checkout takes only meta and id. The docs do not state how long a checkout stays
+      cancellable, nor whether cancel succeeds after completion. Treat "before
+      complete_checkout" as the only safe assumption.
+  - operation: complete_checkout
+    reversal: none
+    reversal_operation_id: null
+    window: none
+    window_source: https://drinkprime.com/policies/refund-policy
+    grade: irreversible
+    note: >-
+      There is no refund, void or reverse operation in the tool set, and the published refund
+      policy closes the door explicitly: "All PRIME purchases (drinks, powder, and merchandise)
+      made directly on our website are final sale and we are unable to accept returns or refunds
+      on our products." An agent that calls complete_checkout has spent the buyer's money
+      permanently. This is precisely why the provider makes buyer approval a hard requirement
+      and why complete_checkout is the only tool carrying a mandatory idempotency key.
+  read_only: false
+  cross_reference:
+    authentication: authentication/prime-hydration-authentication.yml
+    rate_limits: rate-limits/prime-hydration-rate-limits.yml
+    lifecycle: lifecycle/prime-hydration-lifecycle.yml
+    agentic_access: agentic-access/prime-hydration-agentic-access.yml

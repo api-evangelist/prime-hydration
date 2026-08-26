@@ -1,0 +1,25 @@
+generated: '2026-08-26'
+method: searched
+source: >-
+  Registry searches on 2026-08-26 - registry.npmjs.org/-/v1/search for "drinkprime" (0 results),
+  "primehydration" (0 results) and "prime-hydration" (5262 results, none related - top hits are
+  tailwindcss-primeui, react-hydration-on-demand, primevue); pypi.org/pypi/{drinkprime,
+  prime-hydration, primehydration}/json all HTTP 404; rubygems.org/api/v1/gems/{same}.json all
+  HTTP 404. Plus a full walk of the drinkprime.com page sitemap (47 pages, HTTP 200) and
+  https://drinkprime.com/agents.md / llms.txt, neither of which names an SDK, client library or
+  package of any kind.
+package_count: 0
+official_package_count: 0
+packages: []
+note: >-
+  Prime Hydration ships no client libraries. There is nothing to abandon and nothing to date -
+  this is a beverage company whose only machine surface is a platform-provided UCP/MCP endpoint
+  that an agent calls directly over JSON-RPC with no SDK in between. No SDKs pointer is emitted
+  for this reason; the artifact exists to record that the registries were actually searched and
+  came back empty, which is a different fact from "not checked".
+distribution:
+  model: none
+  client_expectation: >-
+    Any MCP-capable client speaks to https://drinkprime.com/api/ucp/mcp directly. The provider's
+    own llms.txt recommends the Shopify-wide Shop skill (https://shop.app/SKILL.md) for personal
+    shopping agents - that is Shopify's distribution, not Prime Hydration's.

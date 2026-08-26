@@ -1,0 +1,82 @@
+generated: '2026-08-26'
+method: probed
+source: >-
+  Direct unauthenticated HTTP probes of /.well-known/* on every host named in apis.yml
+  (drinkprime.com) and on the Shopify Customer Accounts host it delegates to
+  (orders.drinkprime.com), 2026-08-26.
+note: >-
+  drinkprime.com serves four real /.well-known documents. Three are Shopify Customer Accounts
+  OAuth/OIDC metadata (the store's own authorization surface, issuer
+  https://shopify.com/authentication/60993569009, delegated to orders.drinkprime.com); the
+  fourth, /.well-known/ucp, is the Universal Commerce Protocol merchant profile for this
+  specific store and names PRIME as the merchant (merchant_name "PRIME", merchant_origin
+  "drinkprime.com", shop_id 60993569009). These are platform-provided by Shopify but served
+  from and scoped to Prime Hydration's own domain and store. No security.txt, no api-catalog,
+  no ai-plugin.json and no agent card are served on any host.
+hosts:
+- host: drinkprime.com
+  documents:
+  - path: /.well-known/ucp
+    status: 200
+    content_type: application/json
+    file: prime-hydration-ucp.json
+    note: >-
+      UCP merchant profile. version 2026-04-08, supported_versions 2026-04-08 and 2026-01-23,
+      services dev.ucp.shopping (mcp + embedded transports), capabilities cart, checkout,
+      fulfillment, discount, order, catalog.search, catalog.lookup, dev.shopify.catalog;
+      payment_handlers com.google.pay, dev.shopify.card, dev.shopify.shop_pay.
+  - path: /.well-known/openid-configuration
+    status: 200
+    content_type: application/json
+    file: prime-hydration-openid-configuration.json
+  - path: /.well-known/oauth-authorization-server
+    status: 200
+    content_type: application/json
+    file: prime-hydration-oauth-authorization-server.json
+    note: RFC 8414 authorization server metadata; byte-identical to the OIDC discovery document.
+  - path: /.well-known/oauth-protected-resource
+    status: 200
+    content_type: application/json
+    file: prime-hydration-oauth-protected-resource.json
+    note: >-
+      RFC 9728 protected resource metadata. resource https://drinkprime.com,
+      authorization_servers [https://orders.drinkprime.com,
+      https://shopify.com/authentication/60993569009], bearer_methods_supported [header].
+  - path: /.well-known/security.txt
+    status: 404
+    file: null
+  - path: /.well-known/api-catalog
+    status: 404
+    file: null
+  - path: /.well-known/ai-plugin.json
+    status: 404
+    file: null
+  - path: /.well-known/agent-card.json
+    status: 404
+    file: null
+  - path: /.well-known/agent.json
+    status: 404
+    file: null
+- host: orders.drinkprime.com
+  documents:
+  - path: /.well-known/openid-configuration
+    status: 200
+    content_type: application/json
+    file: prime-hydration-openid-configuration.json
+    note: Same document as the storefront host; orders.drinkprime.com is the delegated auth origin.
+  - path: /.well-known/oauth-authorization-server
+    status: 200
+    content_type: application/json
+    file: prime-hydration-oauth-authorization-server.json
+  - path: /.well-known/security.txt
+    status: 404
+    file: null
+  - path: /.well-known/api-catalog
+    status: 404
+    file: null
+  - path: /.well-known/ai-plugin.json
+    status: 404
+    file: null
+  - path: /.well-known/agent-card.json
+    status: 404
+    file: null

@@ -1,0 +1,145 @@
+generated: '2026-08-26'
+method: searched
+source: >-
+  https://drinkprime.com/robots.txt (HTTP 200),
+  https://drinkprime.com/llms.txt (HTTP 200),
+  https://drinkprime.com/agents.md (HTTP 200),
+  https://drinkprime.com/sitemap_agentic_discovery.xml (HTTP 200),
+  and the live tool set at https://drinkprime.com/api/ucp/mcp - all probed 2026-08-26.
+note: >-
+  This is a SEARCHED artifact, not a generated recommendation. Prime Hydration publishes an
+  explicit, unusually specific agent-access policy in three places that agree with each other,
+  and it draws the line exactly where it matters: reading and cart-building are invited,
+  finalising payment without a human is forbidden. The policy text below is quoted verbatim
+  from the provider's own files.
+posture: invited-with-a-hard-stop
+discovery:
+  robots_txt: https://drinkprime.com/robots.txt
+  agents_md: https://drinkprime.com/agents.md
+  llms_txt: https://drinkprime.com/llms.txt
+  agentic_sitemap: https://drinkprime.com/sitemap_agentic_discovery.xml
+  ucp_profile: https://drinkprime.com/.well-known/ucp
+  mcp_endpoint: https://drinkprime.com/api/ucp/mcp
+  canonical: >-
+    agents.md is named canonical; llms.txt mirrors it. /sitemap_agentic_discovery.xml exists for
+    the sole purpose of pointing crawlers at /agents.md.
+crawl_policy:
+  robots_user_agent: '*'
+  default: Allow /
+  ai_crawlers_blocked: false
+  note: >-
+    No GPTBot, ClaudeBot, CCBot, PerplexityBot or Google-Extended block. Public product,
+    collection, page, blog, policy, cart and localized HTML is explicitly declared crawlable.
+  disallowed:
+  - /admin
+  - /cart/
+  - /checkout
+  - /checkouts/
+  - /orders
+  - /account
+  - /services
+  - /sf_*
+  - /cart.js
+  - /recommendations/products
+  ajax_note: >-
+    The AJAX surfaces /cart.js and /recommendations/products are deliberately disallowed with
+    the comment "agents should use UCP/MCP instead" - a redirection of agents onto the
+    supported contract rather than a block.
+policy_quotes:
+- source: https://drinkprime.com/robots.txt
+  text: >-
+    Checkouts are for humans. Do NOT complete checkout, payment, or order placement
+    automatically - no scripted form fills, browser automation, or end-to-end agent flows that
+    finalize payment without an explicit, contemporaneous human approval step. Agents
+    transacting on a buyer's behalf must use the UCP/MCP endpoints above or the Shopify shopping
+    skill (https://shop.app/SKILL.md); both require buyer approval before payment.
+- source: https://drinkprime.com/llms.txt
+  text: >-
+    Checkout requires human approval. Agents must not complete payment without explicit buyer
+    consent. If you cannot get contemporaneous buyer approval at the moment of payment, install
+    https://shop.app/SKILL.md and route the purchase through Shop Pay instead.
+- source: https://drinkprime.com/llms.txt
+  text: >-
+    Respect rate limits. The MCP endpoint is rate-limited per IP. Back off on 429 responses.
+operations:
+- tool: search_catalog
+  action_class: read
+  consequence: none
+  escalation: none
+  token: anonymous
+- tool: lookup_catalog
+  action_class: read
+  consequence: none
+  escalation: none
+  token: anonymous
+- tool: get_product
+  action_class: read
+  consequence: none
+  escalation: none
+  token: anonymous
+- tool: get_cart
+  action_class: read
+  consequence: none
+  escalation: none
+  token: anonymous
+- tool: get_checkout
+  action_class: read
+  consequence: none
+  escalation: none
+  token: anonymous
+- tool: get_order
+  action_class: read
+  consequence: none
+  escalation: none
+  token: anonymous
+- tool: create_cart
+  action_class: write
+  consequence: reversible
+  reversal: cancel_cart
+  escalation: none
+  token: anonymous
+- tool: update_cart
+  action_class: write
+  consequence: reversible
+  reversal: cancel_cart
+  escalation: none
+  token: anonymous
+- tool: cancel_cart
+  action_class: write
+  consequence: reversible
+  escalation: none
+  token: anonymous
+- tool: create_checkout
+  action_class: write
+  consequence: reversible
+  reversal: cancel_checkout
+  escalation: none
+  token: anonymous
+- tool: update_checkout
+  action_class: write
+  consequence: reversible
+  reversal: cancel_checkout
+  escalation: none
+  token: anonymous
+- tool: cancel_checkout
+  action_class: write
+  consequence: reversible
+  escalation: none
+  token: anonymous
+- tool: complete_checkout
+  action_class: transact
+  consequence: irreversible
+  reversal: none
+  refund_available: false
+  refund_policy: https://drinkprime.com/policies/refund-policy
+  escalation: human-approval-required
+  escalation_basis: provider-published (robots.txt and llms.txt, verbatim above)
+  idempotency_key: required (meta.idempotency-key)
+  token: anonymous + buyer-authorized payment handler
+recommended_agent_contract:
+  - Read /agents.md before acting; it is the canonical instruction document.
+  - Send meta.ucp-agent.profile on every call.
+  - Treat 429 as a hard backoff signal; no numeric budget is published.
+  - Never call complete_checkout without contemporaneous, explicit buyer approval.
+  - Always supply meta.idempotency-key on complete_checkout; a retry without it may double-charge.
+  - Know before you act that the purchase is final sale - there is no refund tool and no refund policy.

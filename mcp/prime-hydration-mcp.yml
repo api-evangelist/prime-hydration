@@ -1,0 +1,135 @@
+generated: '2026-08-26'
+method: probed
+source: >-
+  POST https://drinkprime.com/api/ucp/mcp {"jsonrpc":"2.0","id":1,"method":"tools/list"} ->
+  HTTP 200 application/json, 52007 bytes, 13 tools with full JSON Schema draft 2020-12
+  inputSchemas. Endpoint discovered from https://drinkprime.com/llms.txt and
+  https://drinkprime.com/robots.txt, confirmed against https://drinkprime.com/.well-known/ucp.
+name: PRIME Storefront UCP Shopping MCP Server
+status: live
+ownership: >-
+  Served from drinkprime.com, Prime Hydration's own storefront domain, and scoped to Prime
+  Hydration's own store: the UCP profile at /.well-known/ucp names merchant_name "PRIME",
+  merchant_origin "drinkprime.com" and shop_id 60993569009. The server implementation is
+  provided by the Shopify platform (the UCP profile's canonical endpoint resolves to
+  drinkprime.myshopify.com), so this is a platform-provided server operated on the provider's
+  behalf, not a bespoke Prime Hydration build - recorded here because it is a real, live,
+  anonymously reachable agent surface on the provider's own host.
+deployment:
+  mode: remote
+  endpoint: https://drinkprime.com/api/ucp/mcp
+  install: null
+  package: null
+  auth: none
+  verified: probed
+transport: streamable-http (JSON-RPC 2.0 over POST; Accept application/json, text/event-stream)
+protocol:
+  name: Universal Commerce Protocol
+  spec: https://ucp.dev/2026-04-08/specification/overview/
+  version: '2026-04-08'
+  supported_versions:
+  - '2026-04-08'
+  - '2026-01-23'
+  service: dev.ucp.shopping
+  schema: https://ucp.dev/2026-04-08/services/shopping/mcp.openrpc.json
+raw_tools_list: mcp/prime-hydration-mcp-tools.json
+tool_count: 13
+common_inputs:
+  meta.ucp-agent.profile:
+    required: true
+    type: string (uri)
+    note: Agent profile URI for UCP discovery. Required on EVERY tool call.
+  meta.idempotency-key:
+    required: true
+    applies_to:
+    - complete_checkout
+    type: string
+    note: An idempotency key for completing the checkout. Required, not optional.
+tools:
+- name: search_catalog
+  category: catalog
+  description: >-
+    Search for products from the online store, hosted on Shopify. Natural-language query,
+    filters, or both; at least one required. Paginated via pagination.cursor. Response conforms
+    to dev.ucp.shopping.catalog.search.
+  required: [meta, catalog]
+- name: lookup_catalog
+  category: catalog
+  description: Look up multiple products or variants by identifier.
+  required: [meta, catalog]
+- name: get_product
+  category: catalog
+  description: Retrieve complete product detail by identifier. Returns a singular product.
+  required: [meta, catalog]
+- name: create_cart
+  category: cart
+  description: Creates a new cart.
+  required: [meta, cart]
+- name: get_cart
+  category: cart
+  description: Get the cart contents.
+  required: [meta, id]
+- name: update_cart
+  category: cart
+  description: Perform updates to a cart.
+  required: [meta, cart, id]
+- name: cancel_cart
+  category: cart
+  description: Cancels a cart.
+  required: [meta, id]
+  reversal_of: create_cart
+- name: create_checkout
+  category: checkout
+  description: >-
+    Creates a checkout. Returns checkout details, including line items, totals, and any
+    applicable discounts or taxes.
+  required: [meta, checkout]
+- name: get_checkout
+  category: checkout
+  description: >-
+    Returns details about the checkout, including line items, totals, and any applicable
+    discounts or taxes.
+  required: [meta, id]
+- name: update_checkout
+  category: checkout
+  description: Updates a checkout (shipping address, shipping method, buyer details).
+  required: [meta, checkout, id]
+- name: complete_checkout
+  category: checkout
+  description: >-
+    Completes a checkout and returns the checkout result, including order ID, Thank You Page
+    URL, or any errors encountered. Requires meta.idempotency-key AND contemporaneous buyer
+    approval of payment.
+  required: [meta, id, checkout]
+  consequence: irreversible-write
+- name: cancel_checkout
+  category: checkout
+  description: Cancels a checkout.
+  required: [meta, id]
+  reversal_of: create_checkout
+- name: get_order
+  category: order
+  description: Get the details of an order.
+  required: [meta, id]
+conventions:
+  money: >-
+    All prices are integers in the currency's ISO 4217 minor units paired with a currency code
+    ({"amount": 600, "currency": "USD"} is $6.00). Agents must convert to major units before
+    quoting a price to a buyer.
+  identifiers: Shopify global IDs, e.g. 'gid://shopify/Checkout/abc123', 'gid://shopify/Cart/abc123'.
+  buyer_context: Pass context.address_country and context.currency for accurate pricing and availability.
+rate_limits: See rate-limits/prime-hydration-rate-limits.yml - per-IP, 429 with required backoff, no published numbers.
+policy: >-
+  Checkout requires human approval. Per https://drinkprime.com/robots.txt and
+  https://drinkprime.com/llms.txt, agents must not complete checkout, payment or order placement
+  automatically without an explicit, contemporaneous human approval step.
+alternative_surfaces:
+  shop_skill: https://shop.app/SKILL.md
+  shop_skill_note: >-
+    llms.txt recommends personal shopping agents install the Shopify-wide Shop skill rather than
+    scripting the storefront. That skill is Shopify's, not Prime Hydration's, and is recorded as
+    a referenced third-party surface only.
+  read_only_json:
+  - GET https://drinkprime.com/products.json
+  - GET https://drinkprime.com/products/{handle}.json
+  - GET https://drinkprime.com/collections/{handle}/products.json

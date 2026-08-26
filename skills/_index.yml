@@ -1,0 +1,32 @@
+generated: '2026-08-26'
+method: generated
+source: >-
+  Grounded in mcp/prime-hydration-mcp-tools.json - the verbatim tools/list response from
+  https://drinkprime.com/api/ucp/mcp (HTTP 200, 2026-08-26). Every operation named in these
+  skills is a tool that server actually returned; none is invented. Prime Hydration publishes no
+  skills or AGENTS.md of its own (it does publish /agents.md, an instruction document rather
+  than a packaged skill, saved verbatim at llms/prime-hydration-agents.md).
+skill_count: 1
+skills:
+- name: shop-prime-store
+  file: prime-hydration-shop-prime-store.md
+  api: PRIME Storefront Agentic Commerce API (UCP / MCP)
+  description: >-
+    Search the PRIME catalog, build a cart and take a buyer to the point of checkout on
+    drinkprime.com over the store's UCP/MCP endpoint, stopping at the human-approval gate and
+    warning that payment is irreversible.
+  operations:
+  - search_catalog
+  - lookup_catalog
+  - get_product
+  - create_cart
+  - get_cart
+  - update_cart
+  - cancel_cart
+  - create_checkout
+  - get_checkout
+  - update_checkout
+  - complete_checkout
+  - cancel_checkout
+  - get_order
+  grounding: mcp/prime-hydration-mcp-tools.json

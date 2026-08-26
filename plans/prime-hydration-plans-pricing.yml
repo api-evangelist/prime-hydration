@@ -1,0 +1,23 @@
+generated: '2026-08-26'
+method: searched
+source: >-
+  Full walk of the drinkprime.com page sitemap
+  (https://drinkprime.com/sitemap_pages_1.xml, HTTP 200, 47 pages) plus
+  https://drinkprime.com/llms.txt and https://drinkprime.com/agents.md, 2026-08-26.
+plan_count: 0
+note: >-
+  Prime Hydration sells beverages, not API access. There is no developer plan, no API pricing
+  page, no metered tier, no free tier and no contact-sales gate for the agent surface - the UCP
+  MCP endpoint at /api/ucp/mcp is anonymous and free to call, and the store's only prices are
+  product prices in the catalog. This is plan_count 0 because none exists, not because none was
+  found: the sitemap contains no /pages/pricing, /pages/developers or /pages/api of any kind,
+  and neither llms.txt nor agents.md mentions cost, quota or entitlement.
+plans: []
+commercial_model:
+  type: none-for-api
+  api_access_cost: free
+  api_access_gate: none
+  monetization: >-
+    Direct-to-consumer product sales and retail distribution. The agent surface exists to sell
+    drinks, so it is deliberately open - the revenue is the order, not the API call.
+  product_pricing_visible_at: https://drinkprime.com/collections/all
