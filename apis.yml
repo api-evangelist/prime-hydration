@@ -13,6 +13,17 @@ description: >-
   Accounts OAuth 2.0 / OpenID Connect metadata. Agent-driven purchase is explicitly permitted;
   agent-completed payment without contemporaneous buyer approval is explicitly forbidden.
 url: https://raw.githubusercontent.com/api-evangelist/prime-hydration/refs/heads/main/apis.yml
+deliveryModel:
+  model: saas
+  open_source: false
+  commercial: true
+  callable_host: false
+  label: Hosted service · you call their endpoint
+  confidence: medium
+  source:
+  - pricing
+  generated: '2026-08-28'
+  method: derived
 image: https://drinkprime.com/cdn/shop/files/PRIME_Social_Sharing_Image_1200x.png?v=1734715820
 x-type: company
 x-source: harvest:secondary-market
