@@ -40,6 +40,19 @@ tags:
 - Direct to Consumer
 - Agentic Commerce
 - Universal Commerce Protocol
+- MCP
+- Shopify
+- Sports Nutrition
+tags_raw:
+- Company
+- Beverages
+- Consumer Packaged Goods
+- Food and Beverage
+- Retail
+- E-Commerce
+- Direct to Consumer
+- Agentic Commerce
+- Universal Commerce Protocol
 - Model Context Protocol
 - Shopify
 - Sports Nutrition
@@ -56,6 +69,14 @@ apis:
   humanURL: https://drinkprime.com/agents.md
   baseURL: https://drinkprime.com/api/ucp/mcp
   tags:
+  - Agentic Commerce
+  - MCP
+  - Universal Commerce Protocol
+  - Catalog
+  - Cart
+  - Checkout
+  - Order
+  tags_raw:
   - Agentic Commerce
   - MCP
   - Universal Commerce Protocol
